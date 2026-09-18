@@ -1,0 +1,83 @@
+.glowny{
+    height: 100vh;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(237, 221, 83, 1) 100%);
+}
+
+.login-box{
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.9); 
+    min-width: 50%;
+    min-height: 50%;
+    border: 11px ridge #1aa383;
+    border-radius: 15px; 
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+.login-box h2{
+    color: #0F2D3A;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: 5px ridge #1aa383;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+.login-box p {
+    color: #1aa383;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+.login-box input{
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid #1aa383;
+    width: 80%;
+    padding: 8px;
+    font-size: 16px;
+    text-align: center;
+    color: #333;
+    transition:border-bottom 0.2s;
+}
+
+.login-box input:focus{ 
+    outline: none;
+    border-bottom: 3px solid #0F2D3A;
+}
+
+.przyciski button{ 
+  padding: 0.5rem 1rem; 
+  cursor: pointer; 
+  border: none; 
+  border-radius: 4px; 
+  font-weight: bold;
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 10px 10px rgba(0,0,0,0.3); 
+  text-align: center;
+  margin-top: 30px;
+  background-color: #41b883; 
+  color: white; 
+}
+
+.przyciski button:hover { 
+  transform: translateY(-5px); 
+  background-color:darkkhaki; 
+  color: black; 
+}
+
+.brak-konta{
+    padding-top: 30px;
+}
+

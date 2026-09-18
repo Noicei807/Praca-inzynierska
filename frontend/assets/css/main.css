@@ -1,0 +1,140 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
+
+.nawigacja { 
+  display: flex; 
+  align-items: center; 
+  padding: 1rem 2rem; 
+  background: #2A7B9B;
+  background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(237, 221, 83, 1) 100%);
+  color: white; 
+  justify-content: end;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.logo { 
+    font-size: 1.5rem; 
+    font-weight: bold; 
+}
+.nazwa-wypozyczalni{
+    margin-right: auto;
+    color: white;
+    font-size: 1.5 rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.menu {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    flex-wrap: wrap;
+}
+.menu button { 
+  margin-left: 1rem; 
+  padding: 0.5rem 1rem; 
+  cursor: pointer; 
+  border: none; 
+  border-radius: 4px; 
+  font-weight: bold;
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
+
+}
+
+.menu button:hover { 
+  transform: translateY(-5px); 
+  background-color: white; 
+  color: black; 
+}
+.przycisk-logowanie { 
+    background-color: #41b883; 
+    color: white; 
+}
+
+.przycisk-rejestracja { 
+    background-color: #41b883; 
+    color: white; 
+}
+
+.przycisk-rozwijany { 
+    background-color: #41b883; 
+    color: white; 
+}
+
+.przycisk-koszyk {
+     background-color: brown; 
+    color: white; 
+}   
+
+
+.wyszukiwarka-logo { 
+    padding: 15px 0;
+    box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+    background: linear-gradient(180deg, #2A7B9B 0%, #0F2D3A 100%);
+    color: white;
+    display: grid; 
+    grid-template-columns: 1fr auto 1fr; 
+    align-items: center; 
+    gap: 1rem; 
+}
+
+.logo {
+    text-align: center;
+}
+
+.zdjecie-logo {
+  width: 10vw;
+  min-width: 80px; 
+  max-width: 150px;
+  height: auto; 
+}
+
+.wyszukiwarka {
+  min-width: 280px; 
+  min-height: 3rem;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  align-items: center;
+}
+
+.pole-tekstowe{
+    width: 50vw; 
+    min-height: 3rem; 
+    font-size: 1.2rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: black;
+    border: none;
+    border-bottom: 2px solid #41b883;
+    border-radius: 4px;
+    padding-left: 15px;
+    outline: none;
+    transition: border-bottom 0.2s;
+    background-color:beige;
+}
+
+.przycisk-szukaj{
+    min-height: 3rem; 
+    font-size: 1.2rem;
+    padding: 0 2rem;
+    background-color: #41b883;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s, background-color 0.2s;
+}
+.przycisk-szukaj:hover{
+  transform: translateY(-5px); 
+  background-color: white; 
+  color: black; 
+}
+
+.input-ogolny::placeholder {
+    color: rgba(255, 255, 255, 0.8);
+}

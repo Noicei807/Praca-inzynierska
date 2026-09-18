@@ -1,0 +1,8 @@
+POST http://localhost:3001/api/ksiazki
+Content-Type: application/json
+
+{
+  "tytul": "Wiedźmin: Ostatnie Życzenie",
+  "autor": "Andrzej Sapkowski",
+  "google_books_id": "12345XYZ"
+}

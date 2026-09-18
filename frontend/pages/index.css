@@ -1,0 +1,84 @@
+
+.zawartosc h1 { 
+    color: #2c3e50; 
+}
+
+.siatka { 
+  display: flex;
+  justify-content: center; 
+  gap: 2rem; 
+  margin-top: 3rem; 
+  flex-wrap: wrap; 
+}
+
+.kafelek{ 
+  background-color: #ffffff; 
+  padding: 3rem; 
+  border-radius: 8px; 
+  width: 150px; 
+  text-align: center; 
+  font-weight: bold; 
+  color: #2c3e50;
+  cursor: pointer; 
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 10px 10px rgba(0,0,0,0.1); 
+  border: 1px solid #e1e8ed;
+}
+
+.kafelek:hover { 
+  transform: translateY(-5px); 
+  background-color: #41b883; 
+  color: white; 
+}
+
+.zawartosc {
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    height: auto;
+    padding: 3rem 2rem;
+}
+
+/* ----------animowana galeria---------*/
+.galeria{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /*najnizsza warstwa (sam spod strony) na ktorej wyswietlane sa dalsze elementy np kafelki */
+    z-index: 1;
+}
+
+.slajd{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+}
+
+.slajd.aktualne{
+    opacity: 1;
+}
+
+.przyciemnienie{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    /*druga warstwa sluzaca do nakladania przyciemnienia */
+    z-index: 2;
+}
+
+.zawartosc h1, .zawartosc p, .siatka{
+    position: relative;
+    /* trzecia warstwa z pozostala zawartoscia strony*/
+    z-index: 3;
+}
