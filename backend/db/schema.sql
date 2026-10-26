@@ -10,7 +10,7 @@ create table if not exists ksiazki (
     google_books_id varchar(255) unique,
     tytul varchar(255) not null,
     autor varchar(255) not null,
-    czy_dostepna boolean default true,
+    ilosc int not null default 1,
     data_dodania timestamp default current_timestamp
 );
 

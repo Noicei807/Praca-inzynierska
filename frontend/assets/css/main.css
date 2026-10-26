@@ -49,23 +49,14 @@ body {
   background-color: white; 
   color: black; 
 }
-.przycisk-logowanie { 
+.przycisk-logowanie, .przycisk-rejestracja, .przycisk-rozwijany  { 
     background-color: #41b883; 
     color: white; 
 }
 
-.przycisk-rejestracja { 
-    background-color: #41b883; 
-    color: white; 
-}
 
-.przycisk-rozwijany { 
-    background-color: #41b883; 
-    color: white; 
-}
-
-.przycisk-koszyk {
-     background-color: brown; 
+.przycisk-koszyk, .przycisk-wyloguj{
+    background-color: brown; 
     color: white; 
 }   
 

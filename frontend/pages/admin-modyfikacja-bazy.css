@@ -1,0 +1,70 @@
+.modyfikacja{
+background-color: rgb(106, 35, 106);
+color: white;
+}
+.sortowanie-kategoria{
+    height: 35px;
+    font-size: 16px;
+    color: white;   
+    border:none;
+    background-color: rgb(106, 35, 106);
+    border-bottom: 2px solid #41b883; 
+    border-radius: 4px;    
+    width: 100%;
+}
+
+.kategorie button { 
+  margin-left: 1rem; 
+  padding: 0.5rem 1rem; 
+  cursor: pointer; 
+  border: none; 
+  border-radius: 4px; 
+  font-weight: bold;
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
+  margin: 10px;
+}
+
+.ksiazka-dodaj button{ 
+  padding: 0.5rem 1rem; 
+  cursor: pointer; 
+  border: none; 
+  border-radius: 4px; 
+  font-weight: bold;
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 10px 10px rgba(0,0,0,0.3); 
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+  background-color: rgba(245, 241, 8, 1); 
+  color: black; 
+  width: 100%;
+}
+
+.ksiazka-dodaj button:hover { 
+  transform: translateY(-5px); 
+  background-color:rgb(75, 248, 0); 
+  color: black; 
+}
+.ilosc-ksiazek{
+    padding-top: 10px;
+    color: black;
+}
+.ilosc-ksiazek input{
+    width: 100%;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.input-dodaj{
+    font-size: 16px;
+    text-align: center;
+    color: black;
+    border-radius: 4px;
+}
+
+.przycisk-zmiana-dodawanie{
+    background-color: rgb(106, 35, 106); 
+    color: white; 
+}   

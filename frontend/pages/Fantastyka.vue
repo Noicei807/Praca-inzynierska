@@ -129,5 +129,5 @@ onMounted(() => {
 });
 </script>
 
-<style src="./Fantastyka.css" scoped></style>
+<style src="./Kategoria.css" scoped></style>
 
