@@ -3,8 +3,13 @@ import { saveBookToDb } from './db/index.js';
 import { 
   dodajKsiazkeSchema, 
   pobierzKsiazkiQuerySchema, 
-  type NowaKsiazka 
+  type NowaKsiazka,
+  sukcesOdpowiedzSchema, 
+  bladOdpowiedzSchema,
+  idParamSchema, 
+  edytujKsiazkeSchema 
 } from '../shared/index.js';
+import { getLocalBooksFromDb, updateBookQuantityInDb, deleteBookFromDb } from './db/index.js';
 import { 
   serializerCompiler, 
   validatorCompiler, 
@@ -15,8 +20,10 @@ import 'dotenv/config';
 
 const fastify = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 
+// Konfiguracja CORS - pozwalamy na wszystkie metody HTTP
 fastify.register(cors, {
-  origin: 'http://localhost:3000'
+  origin: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 });
 
 fastify.setValidatorCompiler(validatorCompiler);
@@ -42,6 +49,7 @@ const extractTitle = (book: any): string =>
 
 const extractFirstAuthor = (book: any): string =>
   String(book?.volumeInfo?.authors?.[0] || '').toLowerCase();
+
 
 // --- 2. FUNKCJE WYŻSZEGO RZĘDU: FILTROWANIE, SORTOWANIE I PAGINACJA (Currying) ---
 
@@ -101,19 +109,29 @@ const paginateBooks = (page: number, limit: number) => (books: any[]) => {
   };
 };
 
-const createSuccessMessage = () => ({
-  wiadomosc: 'Książka dodana pomyślnie'
-});
 
 // --- 3. FUNKCJE EFEKTÓW UBOCZNYCH (Side-Effects) ---
 
-const fetchGoogleData = (url: string) =>
-  fetch(url).then(response => response.json());
+const fetchGoogleData = async (url: string) => {
+  console.log('-> Pobieram dane z URL:', url); 
+  const response = await fetch(url);
+  const data = await response.json();
+  
+  if (!response.ok || data.error) {
+    throw new Error(`Odmowa z Google API: ${data.error?.message || response.statusText}`);
+  }
+  
+  return data;
+};
 
 const handleError = (reply: any) => (error: any) => {
-  console.error('Blad API:', error);
-  return reply.status(500).send({ error: 'Błąd serwera przy przetwarzaniu żądania' });
+  console.error('KRYTYCZNY BŁĄD W POTOKU:', error.message);
+  return reply.status(500).send({ 
+    error: 'Błąd serwera przy przetwarzaniu żądania', 
+    szczegoly: error.message 
+  });
 };
+
 
 // --- 4. ENDPOINTY (Potoki funkcyjne z kontraktami Zod) ---
 
@@ -136,18 +154,125 @@ fastify.get('/api/ksiazki', {
 });
 
 fastify.post('/api/ksiazki', {
-  schema: { body: dodajKsiazkeSchema }
+  schema: { 
+    body: dodajKsiazkeSchema,
+    response: {
+      200: sukcesOdpowiedzSchema,
+      500: bladOdpowiedzSchema
+    }
+  }
 }, (request, reply) =>
   Promise.resolve(request.body as NowaKsiazka)
     .then(saveBookToDb)
-    .then(createSuccessMessage)
-    .then(response => reply.send(response))
-    .catch(handleError(reply))
+    .then(dbResult => {
+      if (!dbResult.sukces) {
+        request.log.error(dbResult.error);
+        reply.status(500); 
+        return { error: 'Błąd przy zapisie do bazy danych', szczegoly: dbResult.error }; 
+      }
+      return { wiadomosc: 'Książka dodana pomyślnie!' };
+    })
 );
+
+// --- ENDPOINTY LOKALNEJ BAZY (Modyfikacja) ---
+
+fastify.get('/api/ksiazki/lokalne', {
+  schema: { querystring: pobierzKsiazkiQuerySchema } 
+}, (request, reply) => {
+  const params = request.query as any;
+  
+  const standardoweKategorie = ['fantastyka', 'kryminał', 'informatyka', 'biografie', 'historia', 'nauka', 'psychologia', 'romans'];
+  const czyWyszukiwanie = !standardoweKategorie.includes(params.kategoria);
+
+  const fraza = czyWyszukiwanie ? params.kategoria : '';
+  const wybranaKategoria = czyWyszukiwanie ? null : params.kategoria;
+
+  return Promise.resolve(fraza)
+    .then(getLocalBooksFromDb)
+    .then(ksiazki => {
+      let wynik = ksiazki;
+
+      // TŁUMACZ KATEGORII
+      if (wybranaKategoria) {
+        const kat = wybranaKategoria.toLowerCase();
+        wynik = wynik.filter(k => {
+          if (!k.kategoria) return false;
+          const dbKat = k.kategoria.toLowerCase();
+          
+          if (kat === 'fantastyka' && (dbKat.includes('fiction') || dbKat.includes('fantasy'))) return true;
+          if (kat === 'kryminał' && (dbKat.includes('crime') || dbKat.includes('thriller') || dbKat.includes('mystery'))) return true;
+          if (kat === 'informatyka' && (dbKat.includes('computer') || dbKat.includes('tech'))) return true;
+          if (kat === 'biografie' && dbKat.includes('biography')) return true;
+          if (kat === 'historia' && dbKat.includes('history')) return true;
+          if (kat === 'nauka' && dbKat.includes('science')) return true;
+          if (kat === 'psychologia' && dbKat.includes('psychology')) return true;
+          if (kat === 'romans' && dbKat.includes('romance')) return true;
+          
+          return dbKat.includes(kat);
+        });
+      }
+
+      // NAPRAWA BOOLEANÓW
+      if (params.tylkoOkladka === 'true' || params.tylkoOkladka === true) {
+        wynik = wynik.filter(k => k.okladka_url !== null && k.okladka_url !== '');
+      }
+      if (params.tylkoAutor === 'true' || params.tylkoAutor === true) {
+        wynik = wynik.filter(k => k.autor !== null && k.autor !== '');
+      }
+      if (params.tylkoWydawnictwo === 'true' || params.tylkoWydawnictwo === true) {
+        wynik = wynik.filter(k => k.wydawnictwo !== null && k.wydawnictwo !== '');
+      }
+
+      const sprawdzanyRokOd = params.rokOd ? parseInt(params.rokOd) : null;
+      const sprawdzanyRokDo = params.rokDo ? parseInt(params.rokDo) : null;
+      const sprawdzaneJezyki = typeof params.jezyki === 'string' ? params.jezyki.split(',') : params.jezyki;
+
+      if (sprawdzanyRokOd) wynik = wynik.filter(k => k.rok_wydania !== null && k.rok_wydania >= sprawdzanyRokOd);
+      if (sprawdzanyRokDo) wynik = wynik.filter(k => k.rok_wydania !== null && k.rok_wydania <= sprawdzanyRokDo);
+      if (sprawdzaneJezyki && sprawdzaneJezyki.length > 0 && sprawdzaneJezyki[0] !== '') {
+        wynik = wynik.filter(k => k.jezyk !== null && sprawdzaneJezyki.includes(k.jezyk));
+      }
+
+      if (params.sortowanie === 'tytul-az') wynik.sort((a, b) => a.tytul.localeCompare(b.tytul, 'pl'));
+      if (params.sortowanie === 'tytul-za') wynik.sort((a, b) => b.tytul.localeCompare(a.tytul, 'pl'));
+
+      return wynik;
+    })
+    .then(paginateBooks(params.strona, params.limit)) 
+    .then(result => reply.send(result))
+    .catch(handleError(reply));
+});
+
+// Aktualizacja ilości
+fastify.put('/api/ksiazki/lokalne/:id', {
+  schema: { params: idParamSchema, body: edytujKsiazkeSchema }
+}, (request, reply) => {
+  return Promise.resolve()
+    .then(() => updateBookQuantityInDb(request.params.id, request.body.ilosc))
+    .then(dbResult => {
+      if (!dbResult.sukces) return reply.status(500).send({ error: 'Błąd bazy', szczegoly: dbResult.error });
+      return reply.send({ wiadomosc: 'Ilość zaktualizowana pomyślnie' });
+    });
+});
+
+// Usuwanie książki
+fastify.delete('/api/ksiazki/lokalne/:id', {
+  schema: { params: idParamSchema }
+}, (request, reply) => {
+  return Promise.resolve()
+    .then(() => deleteBookFromDb(request.params.id))
+    .then(dbResult => {
+      if (!dbResult.sukces) return reply.status(500).send({ error: 'Błąd bazy', szczegoly: dbResult.error });
+      return reply.send({ wiadomosc: 'Książka usunięta pomyślnie' });
+    });
+});
+
+// --- 5. URUCHOMIENIE SERWERA 
 
 fastify.listen({ port: 3001 }, (err) => {
   if (err) {
     fastify.log.error(err);
     process.exit(1);
   }
+  console.log('Serwer nasłuchuje na porcie 3001...');
 });

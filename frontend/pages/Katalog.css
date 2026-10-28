@@ -1,0 +1,40 @@
+.modal-tlo {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000; backdrop-filter: blur(4px);
+}
+.modal-zawartosc {
+  background: #fff; padding: 30px; border-radius: 12px;
+  width: 800px; max-width: 90vw; max-height: 85vh; overflow-y: auto;
+  position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  border-top: 5px solid #5a3f99; 
+}
+.modal-zamknij-x {
+  position: absolute; top: 15px; right: 20px;
+  font-size: 28px; background: none; border: none;
+  cursor: pointer; color: #666;
+}
+.modal-zamknij-x:hover { color: #d9534f; }
+.modal-ladowanie {
+  text-align: center; font-size: 20px; padding: 40px; color: #5a3f99;
+}
+.modal-grid {
+  display: grid; grid-template-columns: 200px 1fr; gap: 30px; margin-top: 10px;
+}
+.modal-okladka {
+  width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.modal-prawo h2 { margin: 0 0 10px 0; color: #333; font-size: 24px; }
+.modal-prawo h3 { margin: 0 0 15px 0; color: #5a3f99; font-weight: normal; }
+.modal-tagi {
+  display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.modal-tag {
+  background: #f0ebf8; color: #5a3f99;
+  padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: bold;
+}
+.modal-opis {
+  font-size: 15px; line-height: 1.6; color: #444; text-align: justify;
+}

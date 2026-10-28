@@ -3,7 +3,12 @@
     <!------------------- pasek nawigacji - css globalny -------------------------->
     <nav class="nawigacja">
       <div class="menu">
-        <button class="przycisk-zmiana-modyfikacja">Zmień na panel modyfikacji</button>
+<button 
+  class="przycisk-zmiana-modyfikacja" 
+  @click="navigateTo('/admin-modyfikacja-bazy')"
+>
+  Zmień na panel modyfikacji
+</button>
         <button class="przycisk-wyloguj">Wyloguj</button>
       </div>
     </nav>
@@ -69,8 +74,8 @@
         </div>
 
         <div class="zastosowanie-filtrow">
-          <button type="button" class="zastosuj" @click="zastosujFiltry">Zastosuj</button>
-          <button type="button" class="wyczysc" @click="wyczyscFiltry">Wyczyść</button>
+          <button type="button" class="zastosuj" @click="zastosujFiltry" :disabled="ladowanie">Zastosuj</button>
+          <button type="button" class="wyczysc" @click="wyczyscFiltry" :disabled="ladowanie">Wyczyść</button>
         </div>
       </div>
 
@@ -93,6 +98,7 @@
             <button 
               type="submit" 
               class="przycisk-szukaj"
+              :disabled="ladowanie"
               style="position: relative; z-index: 50; pointer-events: auto; cursor: pointer;"
             >
               Szukaj
@@ -101,30 +107,43 @@
         </div>
 
         <div class="widok-wyszukanych-ksiazek">
-          <div v-for="ksiazka in ksiazki" :key="ksiazka.id" class="pojedyncza-ksiazka">
-            <h3 class="tytul-ksiazki">{{ ksiazka.volumeInfo?.title || 'Brak tytułu' }}</h3>
-            <img 
-              class="zdjecia"
-              v-if="ksiazka.volumeInfo?.imageLinks?.thumbnail" 
-              :src="ksiazka.volumeInfo?.imageLinks?.thumbnail" 
-              alt="Okładka" 
-            />
-            <div v-else class="brak-okladki">Brak okładki</div>      
-<div class="ksiazka-dodaj">
-  <div class="ilosc-ksiazek">
-    <input type="number" placeholder="ilość" class="input-dodaj" v-model.number="ilosci[ksiazka.id]">
-  </div>
-  <button type="button" class="przycisk-dodaj" @click="dodajKsiazke(ksiazka)">Dodaj</button>
-</div>
+          <!-- Wskaźnik ładowania -->
+          <div v-if="ladowanie" style="grid-column: 1 / -1; text-align: center; font-size: 20px; padding: 40px;">
+            Trwa komunikacja z Google Books API...
           </div>
+          
+          <!-- Brak wyników -->
+          <div v-else-if="brakWynikow" style="grid-column: 1 / -1; text-align: center; font-size: 20px; padding: 40px; color: red;">
+            Nie znaleziono żadnych książek dla tego zapytania. Spróbuj innej frazy.
+          </div>
+
+          <!-- Właściwa lista książek -->
+          <template v-else>
+            <div v-for="ksiazka in ksiazki" :key="ksiazka.id" class="pojedyncza-ksiazka">
+              <h3 class="tytul-ksiazki">{{ ksiazka.volumeInfo?.title || 'Brak tytułu' }}</h3>
+              <img 
+                class="zdjecia"
+                v-if="ksiazka.volumeInfo?.imageLinks?.thumbnail" 
+                :src="ksiazka.volumeInfo?.imageLinks?.thumbnail" 
+                alt="Okładka" 
+              />
+              <div v-else class="brak-okladki">Brak okładki</div>      
+              
+              <div class="ksiazka-dodaj">
+                <div class="ilosc-ksiazek">
+                  <input type="number" placeholder="ilość" class="input-dodaj" v-model.number="ilosci[ksiazka.id]">
+                </div>
+                <button type="button" class="przycisk-dodaj" @click="dodajKsiazke(ksiazka)">Dodaj</button>
+              </div>
+            </div>
+          </template>
         </div>
 
-        <!-- PASEK PAGINACJI NA DOLE (po 8 książek na stronę) -->
         <div class="paginacja" style="display: flex; justify-content: center; align-items: center; gap: 16px; margin: 24px 0;">
           <button 
             type="button" 
             @click="zmienStrone(obecnaStrona - 1)" 
-            :disabled="obecnaStrona <= 1"
+            :disabled="ladowanie || obecnaStrona <= 1"
             style="padding: 8px 16px; cursor: pointer; font-size: 18px;"
           >
             &larr;
@@ -137,7 +156,7 @@
           <button 
             type="button" 
             @click="zmienStrone(obecnaStrona + 1)" 
-            :disabled="obecnaStrona >= wszystkieStrony"
+            :disabled="ladowanie || obecnaStrona >= wszystkieStrony"
             style="padding: 8px 16px; cursor: pointer; font-size: 18px;"
           >
             &rarr;
@@ -159,6 +178,10 @@ const obecnaStrona = ref(1);
 const wszystkieStrony = ref(1);
 const aktywnyTryb = ref('filtry');
 
+// Stany ładowania i błędów
+const ladowanie = ref(false);
+const brakWynikow = ref(false);
+
 const wyszukiwanaFraza = ref('');
 const wybranaKategoria = ref('fantastyka');
 const rokOd = ref(null);
@@ -169,77 +192,28 @@ const tylkoZOkladka = ref(false);
 const tylkoZAutorem = ref(false);
 const tylkoZWydawnictwem = ref(false);
 
-const buildSearchUrl = (fraza, strona) => {
-  const params = new URLSearchParams({ kategoria: fraza, strona: String(strona), limit: '8' });
-  return `http://localhost:3001/api/ksiazki?${params.toString()}`;
-};
+const pobierzZBackendu = async (params) => {
+  // Jeśli zapytanie już trwa to zignoruj każde kolejne wywołanie
+  if (ladowanie.value) return; 
 
-const buildFilterUrl = (filtry, strona) => {
-  const params = new URLSearchParams({
-    kategoria: filtry.kategoria,
-    sortowanie: filtry.sortowanie,
-    jezyki: filtry.jezyki.join(','),
-    tylkoOkladka: String(filtry.tylkoOkladka),
-    tylkoAutor: String(filtry.tylkoAutor),
-    tylkoWydawnictwo: String(filtry.tylkoWydawnictwo),
-    strona: String(strona),
-    limit: '8'
-  });
-  if (filtry.rokOd) params.set('rokOd', String(filtry.rokOd));
-  if (filtry.rokDo) params.set('rokDo', String(filtry.rokDo));
-  return `http://localhost:3001/api/ksiazki?${params.toString()}`;
-};
-
-const getFilterSnapshot = () => ({
-  kategoria: wybranaKategoria.value,
-  rokOd: rokOd.value,
-  rokDo: rokDo.value,
-  sortowanie: wybraneSortowanie.value,
-  jezyki: wybraneJezyki.value,
-  tylkoOkladka: tylkoZOkladka.value,
-  tylkoAutor: tylkoZAutorem.value,
-  tylkoWydawnictwo: tylkoZWydawnictwem.value
-});
-
-const fetchFromServer = (url) => fetch(url).then(res => {
-  if (!res.ok) throw new Error('Błąd zapytania');
-  return res.json();
-});
-
-const updateViewState = (data) => {
-  ksiazki.value = data.items ?? [];
-  obecnaStrona.value = data.currentPage ?? 1;
-  wszystkieStrony.value = data.totalPages ?? 1;
-};
-
-const wykonajPotok = (url) => Promise.resolve(url)
-  .then(fetchFromServer)
-  .then(updateViewState)
-  .catch(err => console.error(err));
-
-const dodajKsiazke = (ksiazka) => {
-  const payload = {
-    tytul: ksiazka.volumeInfo?.title || 'Brak tytułu',
-    autor: ksiazka.volumeInfo?.authors?.join(', ') || 'Autor nieznany',
-    google_books_id: ksiazka.id,
-    ilosc: ilosci.value[ksiazka.id]
-  };
+  ladowanie.value = true;
+  brakWynikow.value = false;
+  ksiazki.value = []; 
 
   try {
-    const validData = dodajKsiazkeSchema.parse(payload);
-    fetch('http://localhost:3001/api/ksiazki', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(validData)
-    })
-    .then(res => res.json())
-    .then(data => {
-      alert(data.wiadomosc || 'Książka dodana!');
-      ilosci.value[ksiazka.id] = null;
-    })
-    .catch(err => console.error(err));
+    const data = await $fetch('http://localhost:3001/api/ksiazki', { query: params });
+    
+    ksiazki.value = data.items ?? [];
+    obecnaStrona.value = data.currentPage ?? 1;
+    wszystkieStrony.value = data.totalPages ?? 1;
+
+    if (ksiazki.value.length === 0) {
+      brakWynikow.value = true;
+    }
   } catch (error) {
-    if (error.issues) alert(error.issues[0].message);
+    alert("Błąd połączenia: " + (error.data?.error || error.message));
+  } finally {
+    ladowanie.value = false;
   }
 };
 
@@ -247,22 +221,55 @@ const szukajKsiazki = () => {
   const fraza = wyszukiwanaFraza.value.trim();
   if (fraza !== '') {
     aktywnyTryb.value = 'szukaj';
-    wykonajPotok(buildSearchUrl(fraza, 1));
+    pobierzZBackendu({ 
+      kategoria: fraza, 
+      strona: 1, 
+      limit: 8 
+    });
   }
 };
 
 const zastosujFiltry = () => {
-  wyszukiwanaFraza.value = '';
+  wyszukiwanaFraza.value = ''; 
   aktywnyTryb.value = 'filtry';
-  wykonajPotok(buildFilterUrl(getFilterSnapshot(), 1));
+
+  const params = {
+    kategoria: wybranaKategoria.value,
+    sortowanie: wybraneSortowanie.value,
+    jezyki: wybraneJezyki.value.join(','),
+    tylkoOkladka: tylkoZOkladka.value,
+    tylkoAutor: tylkoZAutorem.value,
+    tylkoWydawnictwo: tylkoZWydawnictwem.value,
+    strona: 1,
+    limit: 8
+  };
+  
+  if (rokOd.value) params.rokOd = rokOd.value;
+  if (rokDo.value) params.rokDo = rokDo.value;
+
+  pobierzZBackendu(params);
 };
 
 const zmienStrone = (nowaStrona) => {
   if (nowaStrona < 1 || nowaStrona > wszystkieStrony.value) return;
-  const url = aktywnyTryb.value === 'szukaj'
-    ? buildSearchUrl(wyszukiwanaFraza.value.trim(), nowaStrona)
-    : buildFilterUrl(getFilterSnapshot(), nowaStrona);
-  wykonajPotok(url);
+  
+  if (aktywnyTryb.value === 'szukaj') {
+    pobierzZBackendu({ kategoria: wyszukiwanaFraza.value.trim(), strona: nowaStrona, limit: 8 });
+  } else {
+    const params = {
+      kategoria: wybranaKategoria.value,
+      sortowanie: wybraneSortowanie.value,
+      jezyki: wybraneJezyki.value.join(','),
+      tylkoOkladka: tylkoZOkladka.value,
+      tylkoAutor: tylkoZAutorem.value,
+      tylkoWydawnictwo: tylkoZWydawnictwem.value,
+      strona: nowaStrona,
+      limit: 8
+    };
+    if (rokOd.value) params.rokOd = rokOd.value;
+    if (rokDo.value) params.rokDo = rokDo.value;
+    pobierzZBackendu(params);
+  }
 };
 
 const wyczyscFiltry = () => {
@@ -276,6 +283,40 @@ const wyczyscFiltry = () => {
   tylkoZWydawnictwem.value = false;
   wyszukiwanaFraza.value = '';
   zastosujFiltry();
+};
+
+const dodajKsiazke = async (ksiazka) => {
+  const wybranaIlosc = ilosci.value[ksiazka.id] || 1; 
+  const info = ksiazka.volumeInfo || {};
+
+  // Google podaje daty jako np. "2005-09-01" albo "2005". Wyciągamy sam rok.
+  const dataWydania = info.publishedDate || '';
+  const rokWydania = dataWydania ? parseInt(dataWydania.substring(0, 4), 10) : null;
+
+  const payload = {
+    tytul: info.title || 'Brak tytułu',
+    autor: info.authors?.join(', ') || 'Autor nieznany',
+    google_books_id: ksiazka.id,
+    ilosc: wybranaIlosc,
+    wydawnictwo: info.publisher || null,
+    rok_wydania: isNaN(rokWydania) ? null : rokWydania,
+    jezyk: info.language || null,
+    kategoria: info.categories?.[0] || wybranaKategoria.value || null, // bierzemy z API lub naszego pola
+    okladka_url: info.imageLinks?.thumbnail || null
+  };
+
+  try {
+    const validData = dodajKsiazkeSchema.parse(payload);
+    const odpowiedz = await $fetch('http://localhost:3001/api/ksiazki', {
+      method: 'POST',
+      body: validData
+    });
+    alert(odpowiedz.wiadomosc);
+    ilosci.value[ksiazka.id] = null; 
+  } catch (error) {
+    if (error.issues) alert("Błąd walidacji: " + error.issues[0].message);
+    else alert("Błąd serwera: " + (error.data?.error || error.message));
+  }
 };
 
 onMounted(zastosujFiltry);
