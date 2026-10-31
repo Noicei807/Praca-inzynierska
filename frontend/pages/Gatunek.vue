@@ -1,40 +1,27 @@
 <template>
   <div class="glowny">
     <!------------------- pasek nawigacji - css globalny -------------------------->
-    <nav class="nawigacja">
-      <div class="nazwa-wypozyczalni">
-        <h2>Wypożyczalnia książek BookTabPL</h2>
-      </div>
-      <div class="menu">
-        <div class="rozwijane-menu">
-          <button class="przycisk-rozwijany">Kategorie ▾</button>
-        </div>
-        <button class="przycisk-logowanie">Zaloguj</button>
-        <button class="przycisk-rejestracja">Zarejestruj</button>
-        <button class="przycisk-koszyk">Koszyk</button>
-      </div>
-    </nav>
+    <Nawigacja />
     <!------------------- pasek nawigacji - css globalny -------------------------->
 
     <div class="podstrona">
       <div class="pasek-boczny-filtry">
         <h1>Filtruj według</h1>
 
-<div class="grupa-filtrow">
-  <h2>Kategoria</h2>
-  <!-- Zmiana klasy na sortowanie-ogolny i usunięcie zbędnego diva -->
-  <select class="sortowanie-ogolny" v-model="wybranaKategoria">
-    <option value="wszystkie">Wszystkie</option>
-    <option value="fantastyka">Fantastyka</option>
-    <option value="kryminał">Kryminał i Sensacja</option>
-    <option value="informatyka">Informatyka</option>
-    <option value="biografie">Biografie</option>
-    <option value="historia">Historia</option>
-    <option value="nauka">Nauka</option>
-    <option value="psychologia">Psychologia</option>
-    <option value="romans">Romans</option>
-  </select>
-</div>
+        <div class="grupa-filtrow">
+          <h2>Kategoria</h2>
+          <select class="sortowanie-ogolny" v-model="wybranaKategoria">
+            <option value="wszystkie">Wszystkie</option>
+            <option value="fantastyka">Fantastyka</option>
+            <option value="kryminał">Kryminał i Sensacja</option>
+            <option value="informatyka">Informatyka</option>
+            <option value="biografie">Biografie</option>
+            <option value="historia">Historia</option>
+            <option value="nauka">Nauka</option>
+            <option value="psychologia">Psychologia</option>
+            <option value="romans">Romans</option>
+          </select>
+        </div>
 
         <div class="grupa-filtrow">
           <h2>Rok wydania</h2>
@@ -103,23 +90,21 @@
               
               <div class="info-ksiazki" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                 <span style="text-align: center; font-weight: bold; color: #5a3f99;">Dostępne: {{ ksiazka.ilosc }} szt.</span>
-                <!-- Używamy Twojej klasy przycisk-szczegoly do zachowania wyglądu -->
                 <button class="przycisk-szczegoly" @click="otworzSzczegoly(ksiazka)">Szczegóły</button>
                 <button class="przycisk-szczegoly" style="background-color: #28a745;" @click="dodajDoKoszyka(ksiazka)" :disabled="ksiazka.ilosc < 1">
-                  {{ ksiazka.ilosc > 0 ? 'Dodaj do koszyka' : 'Niedostępna' }}
+                  {{ ksiazka.ilosc > 0 ? 'Dodaj do wypożyczenia' : 'Niedostępna' }}
                 </button>
               </div>
             </div>
           </template>
         </div>
 
-        <!-- Paginacja (Identyczna jak u Admina) -->
+        <!-- Paginacja -->
         <div class="paginacja" style="display: flex; justify-content: center; align-items: center; gap: 16px; margin: 24px 0;">
           <button type="button" @click="zmienStrone(obecnaStrona - 1)" :disabled="ladowanie || obecnaStrona <= 1" style="padding: 8px 16px; cursor: pointer; font-size: 18px;">&larr;</button>
           <span style="font-weight: bold; font-size: 16px;">{{ obecnaStrona }} / {{ wszystkieStrony }}</span>
           <button type="button" @click="zmienStrone(obecnaStrona + 1)" :disabled="ladowanie || obecnaStrona >= wszystkieStrony" style="padding: 8px 16px; cursor: pointer; font-size: 18px;">&rarr;</button>
         </div>
-
       </div>
     </div>
 
@@ -136,7 +121,7 @@
           <div class="modal-lewo">
             <img v-if="szczegolyKsiazki?.okladka_url" :src="szczegolyKsiazki.okladka_url" alt="Okładka" class="modal-okladka" />
             <button class="przycisk-szczegoly" style="width: 100%; margin-top: 15px; background-color: #28a745;" @click="dodajDoKoszyka(szczegolyKsiazki)" :disabled="szczegolyKsiazki?.ilosc < 1">
-              Dodaj do koszyka
+              Dodaj do wypożyczenia
             </button>
           </div>
           
@@ -158,7 +143,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router'; // Pobieranie parametrów z URL
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
@@ -171,37 +156,99 @@ const ladowanie = ref(false);
 const brakWynikow = ref(false);
 
 const wyszukiwanaFraza = ref('');
-// MAGICZNA LINIA: Vue sprawdza czy w linku był gatunek, jak nie, ustawia "wszystkie"
 const wybranaKategoria = ref(route.query.kategoria || 'wszystkie');
 const rokOd = ref(null);
 const rokDo = ref(null);
 const wybraneSortowanie = ref('brak');
 const wybraneJezyki = ref([]);
 
-// Stany dla okienka (Modala)
 const pokazModal = ref(false);
 const ladowanieSzczegolow = ref(false);
 const szczegolyKsiazki = ref(null);
 const pelnyOpisGoogle = ref('');
 
-const pobierzZBackendu = async (params) => {
-  if (ladowanie.value) return; 
-  ladowanie.value = true;
-  brakWynikow.value = false;
-  ksiazki.value = []; 
+// --- 1. FUNKCJE EFEKTÓW UBOCZNYCH (Mutacje stanu UI) ---
 
-  try {
-    const data = await $fetch('http://localhost:3001/api/ksiazki/lokalne', { query: params });
-    ksiazki.value = data.items ?? [];
-    obecnaStrona.value = data.currentPage ?? 1;
-    wszystkieStrony.value = data.totalPages ?? 1;
+const ustawLadowanie = (stan) => () => { ladowanie.value = stan; };
+const ustawBrakWynikow = (stan) => () => { brakWynikow.value = stan; };
+const wyczyscKsiazki = () => () => { ksiazki.value = []; };
+const zakonczLadowanieSzczegolow = () => () => { ladowanieSzczegolow.value = false; };
+const wyczyscFiltryStan = () => {
+  wybranaKategoria.value = 'wszystkie';
+  rokOd.value = null; rokDo.value = null;
+  wybraneSortowanie.value = 'brak'; wybraneJezyki.value = [];
+  wyszukiwanaFraza.value = '';
+};
+const zablokujPobieranie = () => ladowanie.value;
 
-    if (ksiazki.value.length === 0) brakWynikow.value = true;
-  } catch (error) {
-    alert("Błąd połączenia z bazą.");
-  } finally {
-    ladowanie.value = false;
+const aktualizujStanKatalogu = (data) => {
+  ksiazki.value = data.items ?? [];
+  obecnaStrona.value = data.currentPage ?? 1;
+  wszystkieStrony.value = data.totalPages ?? 1;
+  if (ksiazki.value.length === 0) brakWynikow.value = true;
+  return data;
+};
+
+const ustawStanModala = (ksiazka) => {
+  szczegolyKsiazki.value = ksiazka;
+  pokazModal.value = true;
+  ladowanieSzczegolow.value = true;
+  pelnyOpisGoogle.value = 'Brak dodatkowego opisu.';
+  return ksiazka;
+};
+
+const zamknijModal = () => {
+  pokazModal.value = false;
+  szczegolyKsiazki.value = null;
+};
+
+const aktualizujOpisWModalu = (data) => {
+  if (data.volumeInfo?.description) {
+    pelnyOpisGoogle.value = data.volumeInfo.description;
   }
+};
+
+const powiadomOBladzieKatalogu = () => alert("Błąd połączenia z bazą.");
+const powiadomOBladzieSzczegolow = (err) => console.warn("Pominięto szczegóły z API:", err?.message || err);
+
+// --- 2. POTOKI POBIERANIA KATALOGU ---
+
+const budujZadaniePobieraniaKatalogu = (params) => $fetch('http://localhost:3001/api/ksiazki/lokalne', { query: params });
+
+const pobierzZBackendu = (params) => {
+  if (zablokujPobieranie()) return;
+
+  Promise.resolve()
+    .then(ustawLadowanie(true))
+    .then(ustawBrakWynikow(false))
+    .then(wyczyscKsiazki())
+    .then(() => params)
+    .then(budujZadaniePobieraniaKatalogu)
+    .then(aktualizujStanKatalogu)
+    .catch(powiadomOBladzieKatalogu)
+    .finally(ustawLadowanie(false));
+};
+
+const budujParametryFiltrow = () => {
+  const params = {
+    kategoria: wybranaKategoria.value === 'wszystkie' ? '' : wybranaKategoria.value,
+    sortowanie: wybraneSortowanie.value,
+    jezyki: wybraneJezyki.value.join(','),
+    strona: 1, limit: 12
+  };
+  if (rokOd.value) params.rokOd = rokOd.value;
+  if (rokDo.value) params.rokDo = rokDo.value;
+  return params;
+};
+
+const zastosujFiltry = () => {
+  wyszukiwanaFraza.value = ''; 
+  aktywnyTryb.value = 'filtry';
+  return Promise.resolve().then(budujParametryFiltrow).then(pobierzZBackendu);
+};
+
+const wyczyscFiltry = () => {
+  Promise.resolve().then(wyczyscFiltryStan).then(zastosujFiltry);
 };
 
 const szukajKsiazki = () => {
@@ -212,69 +259,65 @@ const szukajKsiazki = () => {
   }
 };
 
-const zastosujFiltry = () => {
-  wyszukiwanaFraza.value = ''; 
-  aktywnyTryb.value = 'filtry';
-
-  const params = {
-    kategoria: wybranaKategoria.value === 'wszystkie' ? '' : wybranaKategoria.value,
-    sortowanie: wybraneSortowanie.value,
-    jezyki: wybraneJezyki.value.join(','),
-    strona: 1, limit: 12
-  };
-  if (rokOd.value) params.rokOd = rokOd.value;
-  if (rokDo.value) params.rokDo = rokDo.value;
-
-  pobierzZBackendu(params);
-};
-
 const zmienStrone = (nowaStrona) => {
   if (nowaStrona < 1 || nowaStrona > wszystkieStrony.value) return;
   if (aktywnyTryb.value === 'szukaj') {
     pobierzZBackendu({ kategoria: wyszukiwanaFraza.value.trim(), strona: nowaStrona, limit: 12 });
   } else {
-    zastosujFiltry(); // uproszczenie
+    zastosujFiltry();
   }
 };
 
-const wyczyscFiltry = () => {
-  wybranaKategoria.value = 'wszystkie';
-  rokOd.value = null; rokDo.value = null;
-  wybraneSortowanie.value = 'brak'; wybraneJezyki.value = [];
-  wyszukiwanaFraza.value = '';
-  zastosujFiltry();
+// --- 3. POTOKI MODALA I WYPOŻYCZEŃ ---
+
+const budujZadaniePobieraniaSzczegolow = (ksiazka) => 
+  ksiazka.google_books_id 
+    ? $fetch(`http://localhost:3001/api/ksiazki/szczegoly/${ksiazka.google_books_id}`)
+    : Promise.reject(new Error('Brak Google ID książki'));
+
+const otworzSzczegoly = (ksiazka) => {
+  Promise.resolve(ksiazka)
+    .then(ustawStanModala)
+    .then(budujZadaniePobieraniaSzczegolow)
+    .then(aktualizujOpisWModalu)
+    .catch(powiadomOBladzieSzczegolow)
+    .finally(zakonczLadowanieSzczegolow());
 };
 
-// Funkcje Modala
-const otworzSzczegoly = async (ksiazka) => {
-  szczegolyKsiazki.value = ksiazka;
-  pokazModal.value = true;
-  ladowanieSzczegolow.value = true;
-  pelnyOpisGoogle.value = 'Brak dodatkowego opisu.';
-
-  if (ksiazka.google_books_id) {
-    try {
-      // Uderza do naszego endpointu Proxy stworzonego w server.ts
-      const data = await $fetch(`http://localhost:3001/api/ksiazki/szczegoly/${ksiazka.google_books_id}`);
-      if (data.volumeInfo?.description) {
-        pelnyOpisGoogle.value = data.volumeInfo.description;
-      }
-    } catch (error) {
-      console.error("Błąd pobierania szczegółów:", error);
-    }
-  }
-  ladowanieSzczegolow.value = false;
+const sprawdzZalogowanie = () => {
+  const token = localStorage.getItem('token');
+  return token ? Promise.resolve(token) : Promise.reject(new Error('Musisz być zalogowany, aby móc wypożyczyć książkę!'));
 };
 
-const zamknijModal = () => {
-  pokazModal.value = false;
-  szczegolyKsiazki.value = null;
+const wyslijZadanieWypozyczenia = (ksiazkaId) => (token) =>
+  $fetch('http://localhost:3001/api/wypozyczenia', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: { ksiazka_id: ksiazkaId }
+  });
+
+const odswiezWidokKatalogu = () => {
+  if (pokazModal.value) zamknijModal();
+  return aktywnyTryb.value === 'szukaj' ? szukajKsiazki() : zastosujFiltry();
 };
 
-// Koszyk
+const obsluzSukcesWypozyczenia = (odpowiedz) => {
+  alert(odpowiedz.wiadomosc);
+  odswiezWidokKatalogu();
+};
+
+const wyciagnijWiadomoscBledu = (error) => error.data?.error || error.message || error;
+const obsluzBladWypozyczenia = (blad) => 
+  Promise.resolve(blad)
+    .then(wyciagnijWiadomoscBledu)
+    .then((msg) => alert("Błąd wypożyczenia: " + msg));
+
 const dodajDoKoszyka = (ksiazka) => {
-  alert(`Dodano do koszyka książkę: ${ksiazka.tytul}`);
-  // Tutaj w przyszłości podepniemy Pinia (stan aplikacji) dla koszyka!
+  Promise.resolve()
+    .then(sprawdzZalogowanie)
+    .then(wyslijZadanieWypozyczenia(ksiazka.id))
+    .then(obsluzSukcesWypozyczenia)
+    .catch(obsluzBladWypozyczenia);
 };
 
 onMounted(zastosujFiltry);

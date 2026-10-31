@@ -1,11 +1,14 @@
 DROP TABLE IF EXISTS wypozyczenia;
 DROP TABLE IF EXISTS ksiazki;
--- Tabela uzytkownicy zostaje nietknięta, ewentualnie dodaj tu DROP jeśli chcesz czyścić wszystko
+DROP TABLE IF EXISTS uzytkownicy;
 
 CREATE TABLE IF NOT EXISTS uzytkownicy (
     id int auto_increment primary key,
+    imie varchar(100) not null,
+    nazwisko varchar(100) not null,
     email varchar(255) not null unique,
-    haslo_hash varchar(255) not null,
+    haslo varchar(255) not null,
+    rola varchar(50) default 'czytelnik',
     data_utworzenia timestamp default current_timestamp
 );
 
@@ -29,7 +32,7 @@ CREATE TABLE IF NOT EXISTS wypozyczenia (
     ksiazka_id int not null,
     data_wypozyczenia timestamp default current_timestamp,
     data_zwrotu timestamp null,
-    status enum('aktywne','zwrocone') default 'aktywne',
+    status enum('oczekujace','wypozyczone','zwrocone') default 'oczekujace',
     foreign key (uzytkownik_id) references uzytkownicy(id),
     foreign key (ksiazka_id) references ksiazki(id)
 );

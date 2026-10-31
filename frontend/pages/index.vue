@@ -1,19 +1,7 @@
 <template>
   <div class="glowny box">
     <!------------------- pasek nawigacji - css globalny -------------------------->
-    <nav class="nawigacja">
-      <div class="nazwa-wypozyczalni">
-        <h2>Wypożyczalnia książek BookTabPL</h2>
-      </div>
-      <div class="menu">
-        <div class="rozwijane-menu">
-          <button class="przycisk-rozwijany">Kategorie ▾</button>
-        </div>
-        <button class="przycisk-logowanie">Zaloguj</button>
-        <button class="przycisk-rejestracja">Zarejestruj</button>
-        <button class="przycisk-koszyk">Koszyk</button>
-      </div>
-    </nav>
+<Nawigacja />
     <!------------------- pasek nawigacji - css globalny -------------------------->
 
     <div class="wyszukiwarka-logo">
@@ -48,12 +36,8 @@
         <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=informatyka')">Informatyka</div>
         <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=biografie')">Biografie</div>
         <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=historia')">Historia</div>
-        <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=biznes')">Biznes i Ekonomia</div>
-        <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=psychologia')">Psychologia</div>
         <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=nauka')">Nauka</div>
-        <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=rozwój')">Rozwój osobisty</div>
-        <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=literatura')">Literatura piękna</div>
-        <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=dzieci')">Dla dzieci</div>
+        <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=psychologia')">Psychologia</div>
         <div class="kafelek" @click="PrzejdzDoStrony('/Gatunek?kategoria=romans')">Romans</div>
       </div>
     </main>

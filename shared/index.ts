@@ -1,13 +1,12 @@
 import { z } from 'zod';
 
-// Współdzielony kontrakt API dla dodawania książki (metoda POST)
+// --- KSIĄŻKI ---
 export const dodajKsiazkeSchema = z.object({
   tytul: z.string().min(1, "Tytuł jest wymagany"),
   autor: z.string().min(1, "Autor jest wymagany"),
   google_books_id: z.string().optional(),
   ilosc: z.number().int().min(1, "Ilość musi wynosić przynajmniej 1"),
   
-  // Nowe, opcjonalne pola dla bazy
   wydawnictwo: z.string().nullable().optional(),
   rok_wydania: z.number().int().nullable().optional(),
   jezyk: z.string().nullable().optional(),
@@ -17,7 +16,6 @@ export const dodajKsiazkeSchema = z.object({
 
 export type NowaKsiazka = z.infer<typeof dodajKsiazkeSchema>;
 
-// Współdzielony kontrakt API dla filtrowania, wyszukiwania i paginacji (metoda GET)
 export const pobierzKsiazkiQuerySchema = z.object({
   kategoria: z.string().default('fantastyka'),
   rokOd: z.string().optional().transform((v) => (v ? parseInt(v, 10) : null)),
@@ -33,7 +31,8 @@ export const pobierzKsiazkiQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(40).default(8)
 });
 
-// Współdzielone kontrakty odpowiedzi z serwera 
+export type PobierzKsiazkiQuery = z.infer<typeof pobierzKsiazkiQuerySchema>;
+
 export const sukcesOdpowiedzSchema = z.object({
   wiadomosc: z.string()
 });
@@ -43,14 +42,32 @@ export const bladOdpowiedzSchema = z.object({
   szczegoly: z.any().optional()
 });
 
-export type PobierzKsiazkiQuery = z.infer<typeof pobierzKsiazkiQuerySchema>;
-
-// --- Panel modyfikacji bazy---
-
+// --- PANEL MODYFIKACJI ---
 export const idParamSchema = z.object({
   id: z.coerce.number().int().positive("ID musi być liczbą dodatnią")
 });
 
 export const edytujKsiazkeSchema = z.object({
   ilosc: z.number().int().min(0, "Ilość nie może być ujemna")
+});
+
+export const googleIdParamSchema = z.object({
+  googleId: z.string().min(1, "Brak ID z Google Books")
+});
+
+// --- AUTORYZACJA
+export const rejestracjaSchema = z.object({
+  imie: z.string().min(2, "Imię musi mieć min. 2 znaki"),
+  nazwisko: z.string().min(2, "Nazwisko musi mieć min. 2 znaki"),
+  email: z.string().email("Niepoprawny format adresu e-mail"),
+  haslo: z.string().min(6, "Hasło musi mieć min. 6 znaków")
+});
+
+export const logowanieSchema = z.object({
+  email: z.string().email("Niepoprawny adres e-mail"),
+  haslo: z.string().min(1, "Hasło jest wymagane")
+});
+
+export const wypozyczenieSchema = z.object({
+  ksiazka_id: z.number().int().positive("Nieprawidłowe ID książki")
 });

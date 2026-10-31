@@ -1,0 +1,135 @@
+.podstrona-admin { 
+  padding: 40px; 
+  max-width: 1000px; 
+  margin: 0 auto; 
+}
+
+.naglowek-konta { 
+  text-align: center; 
+  margin-bottom: 40px; 
+  font-size: 32px; 
+  color: #0F2D3A; 
+}
+
+.komunikat-ladowania { 
+  text-align: center; 
+  font-size: 1.2rem; 
+  color: #2A7B9B;
+  font-weight: bold; 
+}
+
+.brak-danych { 
+  color: #41b883; 
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 30px; 
+  background: #eafaf1;
+  border-radius: 8px;
+  border: 1px dashed #41b883;
+}
+
+.lista-wypozyczen { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 20px; 
+}
+
+.karta-wypozyczenia { 
+  display: flex; 
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px; 
+  padding: 20px; 
+  border-radius: 8px; 
+  background: white; 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 4px solid #EDDD53;
+}
+
+.karta-wypozyczenia:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+.karta-lewo {
+  flex: 0 0 auto;
+}
+
+.miniatura { 
+  width: 80px; 
+  height: 120px; 
+  object-fit: cover; 
+  border-radius: 4px; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.brak-okladki-miniatura { 
+  width: 80px; 
+  height: 120px; 
+  background: beige; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  text-align: center; 
+  font-size: 12px; 
+  color: #0F2D3A; 
+  border-radius: 4px; 
+  border: 1px dashed #2A7B9B;
+}
+
+.info-wypozyczenia { 
+  flex: 1;
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+}
+
+.info-wypozyczenia h3 { 
+  margin: 0 0 5px 0; 
+  font-size: 18px; 
+  color: #0F2D3A; 
+}
+
+.autor {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-style: italic;
+}
+
+.dane-czytelnika {
+  background-color: rgba(42, 123, 155, 0.1);
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+.dane-czytelnika p {
+  margin: 4px 0;
+}
+
+.akcje-wypozyczenia {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.przycisk-zatwierdz { 
+  padding: 10px 20px; 
+  background-color: #41b883; 
+  color: white; 
+  border: none; 
+  border-radius: 4px; 
+  font-size: 15px; 
+  font-weight: bold; 
+  cursor: pointer; 
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.przycisk-zatwierdz:hover {
+  transform: translateY(-3px);
+  background-color: #35996b;
+}

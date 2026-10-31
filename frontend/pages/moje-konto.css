@@ -1,0 +1,120 @@
+.podstrona-konto { 
+  padding: 40px; 
+  max-width: 1200px; 
+  margin: 0 auto; 
+}
+
+.naglowek-konta { 
+  text-align: center; 
+  margin-bottom: 40px; 
+  font-size: 32px; 
+  color: #0F2D3A; 
+}
+
+.komunikat-ladowania { 
+  text-align: center; 
+  font-size: 1.2rem; 
+  color: #2A7B9B;
+  font-weight: bold; 
+}
+
+.sekcje-wypozyczen { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 50px; 
+}
+
+.tytul-sekcji { 
+  border-bottom: 2px solid #ddd; 
+  padding-bottom: 10px; 
+  margin-bottom: 20px; 
+  font-size: 24px; 
+}
+
+.oczekujace-tytul { 
+  color: #EDDD53; 
+  border-color: #EDDD53; 
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.aktywne-tytul { 
+  color: #41b883; 
+  border-color: #41b883; 
+}
+
+.lista-wypozyczen { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  gap: 20px; 
+}
+
+.karta-wypozyczenia { 
+  display: flex; 
+  gap: 15px; 
+  padding: 15px; 
+  border-radius: 8px; 
+  background: white; 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 4px solid #2A7B9B;
+}
+
+.karta-wypozyczenia:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+.miniatura { 
+  width: 80px; 
+  height: 120px; 
+  object-fit: cover; 
+  border-radius: 4px; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.brak-okladki-miniatura { 
+  width: 80px; 
+  height: 120px; 
+  background: beige; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  text-align: center; 
+  font-size: 12px; 
+  color: #0F2D3A; 
+  border-radius: 4px; 
+  border: 1px dashed #2A7B9B;
+}
+
+.info-wypozyczenia { 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+}
+
+.info-wypozyczenia h3 { 
+  margin: 0 0 10px 0; 
+  font-size: 16px; 
+  color: #0F2D3A; 
+}
+
+.status { 
+  font-weight: bold; 
+  margin: 0; 
+  font-size: 14px; 
+}
+
+.status-zolty { 
+  color: #d4a700; 
+}
+
+.status-zielony { 
+  color: #41b883; 
+}
+
+.brak-danych { 
+  color: #2A7B9B; 
+  font-style: italic; 
+  padding: 10px 0; 
+  font-size: 1.1rem;
+}

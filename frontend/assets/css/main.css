@@ -49,13 +49,13 @@ body {
   background-color: white; 
   color: black; 
 }
-.przycisk-logowanie, .przycisk-rejestracja, .przycisk-rozwijany  { 
+.przycisk-logowanie, .przycisk-rejestracja, .przycisk-katalog{ 
     background-color: #41b883; 
     color: white; 
 }
 
 
-.przycisk-koszyk, .przycisk-wyloguj{
+.przycisk-wyloguj{
     background-color: brown; 
     color: white; 
 }   
